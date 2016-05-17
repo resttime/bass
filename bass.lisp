@@ -63,14 +63,14 @@
 (defcfun ("BASS_Get3DPosition" get-3d-position) :bool
   (pos :pointer) (vel :pointer) (front :pointer)
   (top :pointer))
-(defcfun ("BASS_GetEAXParameters" get-e-a-x-parameters) :bool
+(defcfun ("BASS_GetEAXParameters" get-eax-parameters) :bool
   (env :pointer) (vol :pointer) (decay :pointer) (damp :pointer))
 (defcfun ("BASS_Set3DFactors" set-3d-factors) :bool
-  (distf float) (rollf float) (doppf float))
+  (distf :float) (rollf :float) (doppf :float))
 (defcfun ("BASS_Set3DPosition" set-3d-position) :bool
   (pos :pointer) (vel :pointer) (front :pointer) (top :pointer)) 
-(defcfun ("BASS_SetEAXParameters" set-e-a-x-parameters) :bool
-  (env int) (vol float) (decay float) (damp float)) 
+(defcfun ("BASS_SetEAXParameters" set-eax-parameters) :bool
+  (env :int) (vol :float) (decay :float) (damp :float)) 
 
 ;; Samples - Complete
 (defcfun ("BASS_SampleCreate" sample-create) hsample
@@ -125,7 +125,7 @@
   (info :pointer))
 (defcfun ("BASS_RecordGetInput" record-get-input) dword
   (input :int) (volume :pointer))
-(defcfun ("BASS_RecordGetInputName" record-get-input-name) const
+(defcfun ("BASS_RecordGetInputName" record-get-input-name) :string
   (input :int))
 (defcfun ("BASS_RecordInit" record-init) :bool
   (device :int)) 
@@ -162,11 +162,11 @@
 (defcfun ("BASS_ChannelGetLevel" channel-get-level) dword
   (handle dword))
 (defcfun ("BASS_ChannelGetLevelEx" channel-get-level-ex) :bool
-  (handle dword) (levels :pointer) (length float) (flags dword))
+  (handle dword) (levels :pointer) (length :float) (flags dword))
 (defcfun ("BASS_ChannelGetPosition" channel-get-position) qword
   (handle dword) (mode dword))
-(defcfun ("BASS_ChannelGetTags" channel-get-tags) const
-  (handle dword (tags dword)))
+(defcfun ("BASS_ChannelGetTags" channel-get-tags) :string
+  (handle dword) (tags dword))
 (defcfun ("BASS_ChannelIsActive" channel-is-active) dword
   (handle dword))
 (defcfun ("BASS_ChannelIsSliding" channel-is-sliding) :bool
@@ -188,12 +188,12 @@
 (defcfun ("BASS_ChannelSeconds2Bytes" channel-seconds-2-bytes) qword
   (handle dword) (pos :double))
 (defcfun ("BASS_ChannelSet3DAttributes" channel-set-3d-attributes) :bool
-  (handle dword) (mode int) (min float) (max float) (iangle int) (oangle int)
-  (outvol float))
+  (handle dword) (mode :int) (min :float) (max :float) (iangle :int) (oangle :int)
+  (outvol :float))
 (defcfun ("BASS_ChannelSet3DPosition" channel-set-3d-position) :bool
   (handle dword) (pos :pointer) (orient :pointer) (vel :pointer))
 (defcfun ("BASS_ChannelSetAttribute" channel-set-attribute) :bool
-  (handle dword) (attrib dword) (value float))
+  (handle dword) (attrib dword) (value :float))
 (defcfun ("BASS_ChannelSetAttributeEx" channel-set-attribute-ex) :bool
   (handle dword) (attrib dword) (value :pointer) (size dword))
 (defcfun ("BASS_ChannelSetDevice" channel-set-device) :bool
@@ -209,7 +209,7 @@
 (defcfun ("BASS_ChannelSetSync" channel-set-sync) hsync
   (handle dword) (type dword) (param qword) (proc :pointer) (user :pointer))
  (defcfun ("BASS_ChannelSlideAttribute" channel-slide-attribute) :bool
-  (handle dword) (attrib dword) (value float) (time dword)) 
+  (handle dword) (attrib dword) (value :float) (time dword)) 
 (defcfun ("BASS_ChannelStop" channel-stop) :bool
   (handle dword)) 
 (defcfun ("BASS_ChannelUpdate" channel-update) :bool
