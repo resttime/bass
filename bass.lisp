@@ -225,18 +225,15 @@
 (defcfun ("BASS_FXSetPriority" fx-set-priority) :bool
   (handle hfx) (priority :int)) 
 
-(defun test ()
-  (let ((device -1)
-        (freq 44100))
-    (init device freq 0 (null-pointer) (null-pointer))
-    (let ((streaming (stream-create-url "http://stream.r-a-d.io/main.mp3" 0 0
-                                        (null-pointer)
-                                        (null-pointer))))
-      (channel-play streaming nil)
-      streaming)))
-
-;(set-volume 0.02)
-
-;(free)
-
-
+(defun make-music-streamer (url)
+  (init -1 44100 0 (null-pointer) (null-pointer))
+  (let ((stream (stream-create-url url 0 0 (null-pointer) (null-pointer)))
+        (active t)) 
+    (defun control (msg &rest args)
+      (when active
+        (ecase msg
+          (:play (channel-play stream nil))
+          (:pause (channel-pause stream))
+          (:stop (channel-stop stream))
+          (:volume (apply #'channel-set-attribute stream 2 args))
+          (:free (stream-free stream) (setf active nil)))))))
