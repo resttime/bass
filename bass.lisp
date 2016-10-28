@@ -450,16 +450,3 @@
   (handle hfx) (params :pointer))
 (defcfun ("BASS_FXSetPriority" fx-set-priority) :bool
   (handle hfx) (priority :int)) 
-
-(defun make-music-streamer (url)
-  (init -1 44100 0 (null-pointer) (null-pointer))
-  (let ((stream (stream-create-url url 0 0 (null-pointer) (null-pointer)))
-        (active t)) 
-    (defun control (msg &rest args)
-      (when active
-        (ecase msg
-          (:play (channel-play stream nil))
-          (:pause (channel-pause stream))
-          (:stop (channel-stop stream))
-          (:volume (apply #'channel-set-attribute stream 2 args))
-          (:free (stream-free stream) (setf active nil)))))))
