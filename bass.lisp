@@ -72,33 +72,6 @@
   (:net-proxy 17)
   (:ios-notify 46))
 
-
-(defparameter test-options "#define BASS_SAMPLE_8BITS 1
-#define BASS_SAMPLE_FLOAT 256
-#define BASS_SAMPLE_MONO 2
-#define BASS_SAMPLE_LOOP 4
-#define BASS_SAMPLE_3D 8
-#define BASS_SAMPLE_SOFTWARE 16
-#define BASS_SAMPLE_MUTEMAX 32
-#define BASS_SAMPLE_VAM 64
-#define BASS_SAMPLE_FX 128
-#define BASS_SAMPLE_OVER_VOL #x10000
-#define BASS_SAMPLE_OVER_POS #x20000
-#define BASS_SAMPLE_OVER_DIST #x30000")
-
-(defun tokenize-line (line)
-  (let ((splitted (split-sequence:split-sequence #\Space line)))
-    (values (cadr splitted)
-            (caddr splitted))))
-
-(defun make-enum (line)
-  (multiple-value-bind (name val) (tokenize-line line)
-    (list (intern (format nil "~{~a~^-~}" (cddr (split-sequence:split-sequence #\_ name))) "KEYWORD")
-          (read-from-string val))))
-
-(loop for line in (split-sequence:split-sequence #\Newline test-options)
-      do (print (make-enum line)))
-
 ;; Config - Complete
 (defcfun ("BASS_GetConfig" get-config) dword (option config-options))
 (defcfun ("BASS_GetConfigPtr" get-config-ptr) :pointer (option config-ptr-options))
