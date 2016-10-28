@@ -23,32 +23,217 @@
 (defctype hfx dword)
 (defctype hplugin dword)
 
+;; Config - types 
+(defcenum config-options
+  (:BUFFER 0) 
+  (:UPDATEPERIOD 1) 
+  (:GVOL-SAMPLE 4) 
+  (:GVOL-STREAM 5) 
+  (:GVOL-MUSIC 6) 
+  (:CURVE-VOL 7) 
+  (:CURVE-PAN 8) 
+  (:FLOATDSP 9) 
+  (:3DALGORITHM 10) 
+  (:NET-TIMEOUT 11) 
+  (:NET-BUFFER 12) 
+  (:PAUSE-NOPLAY 13) 
+  (:NET-PREBUF 15) 
+  (:NET-PASSIVE 18) 
+  (:REC-BUFFER 19) 
+  (:NET-PLAYLIST 21) 
+  (:MUSIC-VIRTUAL 22) 
+  (:VERIFY 23) 
+  (:UPDATETHREADS 24) 
+  (:DEV-BUFFER 27) 
+  (:VISTA-TRUEPOS 30) 
+  (:IOS-MIXAUDIO 34) 
+  (:DEV-DEFAULT 36) 
+  (:NET-READTIMEOUT 37) 
+  (:VISTA-SPEAKERS 38) 
+  (:IOS-SPEAKER 39) 
+  (:MF-DISABLE 40) 
+  (:HANDLES 41) 
+  (:UNICODE 42) 
+  (:SRC 43) 
+  (:SRC-SAMPLE 44) 
+  (:ASYNCFILE-BUFFER 45) 
+  (:OGG-PRESCAN 47) 
+  (:MF-VIDEO 48) 
+  (:AIRPLAY 49) 
+  (:DEV-NONSTOP 50) 
+  (:IOS-NOCATEGORY 51) 
+  (:VERIFY-NET 52) 
+  (:DEV-PERIOD 53) 
+  (:FLOAT 54) 
+  (:NET-SEEK 56))
+
+(defcenum config-ptr-options
+  (:net-agent 16)
+  (:net-proxy 17)
+  (:ios-notify 46))
+
+
+(defparameter test-options "#define BASS_SAMPLE_8BITS 1
+#define BASS_SAMPLE_FLOAT 256
+#define BASS_SAMPLE_MONO 2
+#define BASS_SAMPLE_LOOP 4
+#define BASS_SAMPLE_3D 8
+#define BASS_SAMPLE_SOFTWARE 16
+#define BASS_SAMPLE_MUTEMAX 32
+#define BASS_SAMPLE_VAM 64
+#define BASS_SAMPLE_FX 128
+#define BASS_SAMPLE_OVER_VOL #x10000
+#define BASS_SAMPLE_OVER_POS #x20000
+#define BASS_SAMPLE_OVER_DIST #x30000")
+
+(defun tokenize-line (line)
+  (let ((splitted (split-sequence:split-sequence #\Space line)))
+    (values (cadr splitted)
+            (caddr splitted))))
+
+(defun make-enum (line)
+  (multiple-value-bind (name val) (tokenize-line line)
+    (list (intern (format nil "~{~a~^-~}" (cddr (split-sequence:split-sequence #\_ name))) "KEYWORD")
+          (read-from-string val))))
+
+(loop for line in (split-sequence:split-sequence #\Newline test-options)
+      do (print (make-enum line)))
+
 ;; Config - Complete
-(defcfun ("BASS_GetConfig" get-config) dword (option dword))
-(defcfun ("BASS_GetConfigPtr" get-config-ptr) :pointer (option dword))
+(defcfun ("BASS_GetConfig" get-config) dword (option config-options))
+(defcfun ("BASS_GetConfigPtr" get-config-ptr) :pointer (option config-ptr-options))
 (defcfun ("BASS_SetConfig" set-config) :bool
-  (option dword) (value dword))
-(defcfun ("BASS_SetConfigPtr" set-config-ptr) :bool (option dword) (value :pointer))
+  (option config-options) (value dword))
+(defcfun ("BASS_SetConfigPtr" set-config-ptr) :bool (option config-ptr-options) (value :pointer))
+
+;; Plugins - Structures
+(defcstruct plugin-form
+  (ctype dword)
+  (name :string)
+  (exts :string))
+(defcstruct plugin-info
+  (version dword)
+  (formatc dword)
+  (formats (:pointer (:struct plugin-form))))
 
 ;; Plugins - Complete
 (defcfun ("BASS_PluginFree" plugin-free) :bool (handle hplugin))
-(defcfun ("BASS_PluginGetInfo" plugin-get-info) :pointer (handle hplugin))
+(defcfun ("BASS_PluginGetInfo" plugin-get-info) (:pointer (:struct plugin-info)) (handle hplugin))
 (defcfun ("BASS_PluginLoad" plugin-load) hplugin (file :string) (flags dword))
 
 ;; Initialization, info, etc... - Complete
-(defcfun ("BASS_ErrorGetCode" error-get-code) :int)
+(defcenum error-codes
+  (:OK 0) 
+  (:MEM 1) 
+  (:FILEOPEN 2) 
+  (:DRIVER 3) 
+  (:BUFLOST 4) 
+  (:HANDLE 5) 
+  (:FORMAT 6) 
+  (:POSITION 7) 
+  (:INIT 8) 
+  (:START 9) 
+  (:SSL 10) 
+  (:ALREADY 14) 
+  (:NOCHAN 18) 
+  (:ILLTYPE 19) 
+  (:ILLPARAM 20) 
+  (:NO3D 21) 
+  (:NOEAX 22) 
+  (:DEVICE 23) 
+  (:NOPLAY 24) 
+  (:FREQ 25) 
+  (:NOTFILE 27) 
+  (:NOHW 29) 
+  (:EMPTY 31) 
+  (:NONET 32) 
+  (:CREATE 33) 
+  (:NOFX 34) 
+  (:NOTAVAIL 37) 
+  (:DECODE 38) 
+  (:DX 39) 
+  (:TIMEOUT 40) 
+  (:FILEFORM 41) 
+  (:SPEAKER 42) 
+  (:VERSION 43) 
+  (:CODEC 44) 
+  (:ENDED 45) 
+  (:BUSY 46) 
+  (:UNKNOWN -1))
+
+(defbitfield device-info-flags
+  (:ENABLED 1) 
+  (:DEFAULT 2) 
+  (:INIT 4) 
+  (:TYPE-MASK 4278190080) 
+  (:TYPE-NETWORK 16777216) 
+  (:TYPE-SPEAKERS 33554432) 
+  (:TYPE-LINE 50331648) 
+  (:TYPE-HEADPHONES 67108864) 
+  (:TYPE-MICROPHONE 83886080) 
+  (:TYPE-HEADSET 100663296) 
+  (:TYPE-HANDSET 117440512) 
+  (:TYPE-DIGITAL 134217728) 
+  (:TYPE-SPDIF 150994944) 
+  (:TYPE-HDMI 167772160) 
+  (:TYPE-DISPLAYPORT 1073741824))
+
+(defbitfield device-flags
+  (:8BITS 1) 
+  (:MONO 2) 
+  (:3D 4) 
+  (:16BITS 8) 
+  (:LATENCY 256) 
+  (:CPSPEAKERS 1024) 
+  (:SPEAKERS 2048) 
+  (:NOSPEAKER 4096) 
+  (:DMIX 8192) 
+  (:FREQ 16384) 
+  (:STEREO 32768))
+
+(defbitfield info-flags
+ (:DSCAPS-CONTINUOUSRATE #x00000010)
+ (:DSCAPS-EMULDRIVER #x00000020)
+ (:DSCAPS-CERTIFIED #x00000040)
+ (:DSCAPS-SECONDARYMONO #x00000100)
+ (:DSCAPS-SECONDARYSTEREO #x00000200)
+ (:DSCAPS-SECONDARY8BIT #x00000400)
+ (:DSCAPS-SECONDARY16BIT #x00000800))
+
+(defcstruct device-info
+  (name :string)
+  (driver :string)
+  (flags device-info-flags))
+
+(defcstruct info
+  (flags info-flags)
+  (hwsize dword)
+  (hwfree dword)
+  (freesam dword)
+  (free3d dword)
+  (minrate dword)
+  (maxrate dword)
+  (eax :bool)
+  (minbuf dword)
+  (dsver dword)
+  (latency dword)
+  (initflags dword)
+  (speakers dword)
+  (freq dword))
+
+(defcfun ("BASS_ErrorGetCode" error-get-code) error-codes)
 (defcfun ("BASS_Free" free) :bool)
 (defcfun ("BASS_GetCPU" get-cpu) :float)
 (defcfun ("BASS_GetDevice" get-device) dword)
 (defcfun ("BASS_GetDeviceInfo" get-device-info) :bool
-  (device dword) (info :pointer))
+  (device dword) (info (:pointer (:struct device-info))))
 (defcfun ("BASS_GetDSoundObject" get-dsound-object) :pointer
   (object dword))
-(defcfun ("BASS_GetInfo" get-info) :bool (info :pointer))
+(defcfun ("BASS_GetInfo" get-info) :bool (info (:pointer (:struct info))))
 (defcfun ("BASS_GetVersion" get-version) dword)
 (defcfun ("BASS_GetVolume" get-volume) :float)
 (defcfun ("BASS_Init" init) :bool
-  (device :int) (freq dword) (flags dword) (win :pointer) (dsguid :pointer))
+  (device :int) (freq dword) (flags device-flags) (win :pointer) (dsguid :pointer))
 (defcfun ("BASS_Pause" pause) :bool)
 (defcfun ("BASS_SetDevice" set-device) :bool (device dword)) 
 (defcfun ("BASS_SetVolume" set-volume) :bool (volume :float))
@@ -57,24 +242,92 @@
 (defcfun ("BASS_Update" update) :bool (length dword))
 
 ;; 3D & EAX - Complete
+
+(defcenum eax-environment
+  :GENERIC
+  :PADDEDCELL
+  :ROOM
+  :BATHROOM
+  :LIVINGROOM
+  :STONEROOM
+  :AUDITORIUM
+  :CONCERTHALL
+  :CAVE
+  :ARENA
+  :HANGAR
+  :CARPETEDHALLWAY
+  :HALLWAY
+  :STONECORRIDOR
+  :ALLEY
+  :FOREST
+  :CITY
+  :MOUNTAINS
+  :QUARRY
+  :PLAIN
+  :PARKINGLOT
+  :SEWERPIPE
+  :UNDERWATER
+  :DRUGGED
+  :DIZZY
+  :PSYCHOTIC
+  :COUNT)
+
+(defcstruct 3d-vector
+  (x :float)
+  (y :float)
+  (z :float))
+
 (defcfun ("BASS_Apply3D" apply-3d) :void)
 (defcfun ("BASS_Get3DFactors" get-3d-factors) :bool
   (distf :pointer) (rollf :pointer) (doppf :pointer))
 (defcfun ("BASS_Get3DPosition" get-3d-position) :bool
-  (pos :pointer) (vel :pointer) (front :pointer)
-  (top :pointer))
-(defcfun ("BASS_GetEAXParameters" get-eax-parameters) :bool
-  (env :pointer) (vol :pointer) (decay :pointer) (damp :pointer))
+  (pos (:pointer (:struct 3d-vector))) (vel (:pointer (:struct 3d-vector)))
+  (front (:pointer (:struct 3d-vector))) (top (:pointer (:struct 3d-vector))))
 (defcfun ("BASS_Set3DFactors" set-3d-factors) :bool
   (distf :float) (rollf :float) (doppf :float))
 (defcfun ("BASS_Set3DPosition" set-3d-position) :bool
-  (pos :pointer) (vel :pointer) (front :pointer) (top :pointer)) 
+  (pos (:pointer (:struct 3d-vector))) (vel (:pointer (:struct 3d-vector)))
+  (front (:pointer (:struct 3d-vector))) (top (:pointer (:struct 3d-vector)))) 
 (defcfun ("BASS_SetEAXParameters" set-eax-parameters) :bool
-  (env :int) (vol :float) (decay :float) (damp :float)) 
+  (env eax-environment) (vol :float) (decay :float) (damp :float)) 
 
 ;; Samples - Complete
+(defbitfield sample-flags
+  (:8BITS 1) 
+  (:FLOAT 256) 
+  (:MONO 2) 
+  (:LOOP 4) 
+  (:3D 8) 
+  (:SOFTWARE 16) 
+  (:MUTEMAX 32) 
+  (:VAM 64) 
+  (:FX 128) 
+  (:OVER-VOL 65536) 
+  (:OVER-POS 131072) 
+  (:OVER-DIST 196608)
+  (:UNICODE #x80000000))
+
+(defcstruct sample
+  (freq dword)
+  (volume :float)
+  (pan :float)
+  (flags sample-flags)
+  (length dword)
+  (max dword)
+  (origres dword)
+  (chans dword)
+  (mingap dword)
+  (mode3d dword)
+  (mindist :float)
+  (maxdist :float)
+  (iangle dword)
+  (oangle dword)
+  (outvol :float)
+  (vam dword)
+  (priority dword))
+
 (defcfun ("BASS_SampleCreate" sample-create) hsample
-  (length dword) (freq dword) (chans dword) (max dword) (flags dword))
+  (length dword) (freq dword) (chans dword) (max dword) (flags sample-flags))
 (defcfun ("BASS_SampleFree" sample-free) :bool (handle hsample))
 (defcfun ("BASS_SampleGetChannel" sample-get-channel) hchannel
   (handle hsample) (onlynew :bool))
@@ -83,14 +336,14 @@
 (defcfun ("BASS_SampleGetData" sample-get-data) :bool
   (handle hsample) (buffer :pointer))
 (defcfun ("BASS_SampleGetInfo" sample-get-info) :bool
-  (handle hsample) (info :pointer))
+  (handle hsample) (info (:pointer (:struct sample))))
 (defcfun ("BASS_SampleLoad" sample-load) hsample
   (mem :bool) (file :pointer) (offset qword) (length dword) (max dword)
-  (flags dword))
+  (flags sample-flags))
 (defcfun ("BASS_SampleSetData" sample-set-data) :bool
   (handle hsample) (buffer :pointer)) 
 (defcfun ("BASS_SampleSetInfo" sample-set-info) :bool
-  (handle hsample) (info :pointer))  
+  (handle hsample) (info (:pointer (:struct sample))))  
 (defcfun ("BASS_SampleStop" sample-stop) :bool (handle hsample))
 
 ;; Streams - Complete

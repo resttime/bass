@@ -1,0 +1,8 @@
+* About
+
+Bindings to the BASS library for all kinds of audio
+
+* Issues
+
+Functions that involve callbacks seem to have an issue...
+Everything else works though
