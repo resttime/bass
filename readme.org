@@ -1,8 +1,18 @@
 * About
 
-Bindings to the BASS library for all kinds of audio
+  Bindings to the BASS library for all kinds of audio and streaming functionality.
+
+* Usage
+
+  Check the native documentation for how to use the functions.  The
+  functions just have a lispy name now.  Also, BASS has some really
+  inconsistent constants it uses for flags and such so the SWIG tool
+  was used without lispifying names.  There's inconsistency, but the
+  inconvenience is certainly minor because I assume pretty much all
+  use cases will just be playing samples without anything fancy.  If
+  you need any help finding them, check out types-constants.lisp
 
 * Issues
-
-Functions that involve callbacks seem to have an issue...
-Everything else works though
+  
+  Functions that involve callbacks seem to have an issue...
+  Everything else works though

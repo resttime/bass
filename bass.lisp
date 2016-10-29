@@ -1,6 +1,3 @@
-(in-package #:cl-user)
-(defpackage #:bass
-  (:use #:cl #:cffi))
 (in-package #:bass)
 
 (define-foreign-library bass
@@ -320,6 +317,23 @@
 (defcfun ("BASS_SampleStop" sample-stop) :bool (handle hsample))
 
 ;; Streams - Complete
+(defbitfield stream-flags
+  (:8BITS 1) 
+  (:FLOAT 256) 
+  (:MONO 2) 
+  (:LOOP 4) 
+  (:3D 8) 
+  (:SOFTWARE 16) 
+  (:MUTEMAX 32) 
+  (:VAM 64) 
+  (:FX 128) 
+  (:OVER-VOL 65536) 
+  (:OVER-POS 131072) 
+  (:OVER-DIST 196608)
+  (:UNICODE #x80000000)
+  (:AUTOFREE #x40000)
+  (:DECODE #x200000))
+
 (defcfun ("BASS_StreamCreate" stream-create) hstream
   (freq dword) (chans dword) (flags dword) (proc :pointer) (user :pointer))
 (defcfun ("BASS_StreamCreateFile" stream-create-file) hstream
@@ -327,7 +341,7 @@
 (defcfun ("BASS_StreamCreateFileUser" stream-create-file-user) hstream
   (system dword) (flags dword) (procs :pointer) (user :pointer))
 (defcfun ("BASS_StreamCreateURL" stream-create-url) hstream
-  (url :string) (offset dword) (flags dword) (proc :pointer) (user :pointer))
+  (url :string) (offset dword) (flags stream-flags) (proc :pointer) (user :pointer))
 (defcfun ("BASS_StreamFree" stream-free) :bool (handle hstream))
 (defcfun ("BASS_StreamGetFilePosition" stream-get-file-position) qword
   (handle hstream) (mode dword)) 
