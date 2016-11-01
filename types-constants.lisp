@@ -742,7 +742,7 @@
 	(Version :pointer)
 	(UMID :pointer :count 64)
 	(Reserved :pointer :count 190)
-	(CodingHistory :pointer :count ))
+	(CodingHistory :pointer :count 1))
 
 (cffi:defcstruct TAG_CART_TIMER
 	(dwUsage :pointer)

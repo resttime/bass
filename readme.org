@@ -1,6 +1,7 @@
 * About
 
-  Bindings to the BASS library for all kinds of audio and streaming functionality.
+  Bindings to the BASS library for all kinds of crossplatform audio
+  and streaming functionality.  
 
 * Usage
 
@@ -9,10 +10,13 @@
   inconsistent constants it uses for flags and such so the SWIG tool
   was used without lispifying names.  There's inconsistency, but the
   inconvenience is certainly minor because I assume pretty much all
-  use cases will just be playing samples without anything fancy.  If
-  you need any help finding them, check out types-constants.lisp
+  use cases will just be playing samples without anything fancy.  Open
+  an issue if it really bothers you and I'll probably listen.
+  Anyways, if you need any help finding them, check out
+  types-constants.lisp, but it's literally the same name.
 
 * Issues
   
-  Functions that involve callbacks seem to have an issue...
-  Everything else works though
+  Functions that involve callbacks seem to have an issue because the
+  library appears to use threads in a way that breaks implementations.
+  Everything else works though.
